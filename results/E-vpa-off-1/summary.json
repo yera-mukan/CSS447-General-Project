@@ -1,0 +1,13 @@
+{
+  "scenario": "E-vpa-off",
+  "rep": 1,
+  "start": "2026-11-19T18:39:23Z",
+  "end": "2026-11-19T18:49:26Z",
+  "start_epoch": 1795113563,
+  "end_epoch": 1795114166,
+  "duration_s": 603,
+  "k6_exit_code": 99,
+  "k6": "/home/ubuntu/ocr/CSS447-General-Project/results/E-vpa-off-1/k6.json",
+  "vpa": "/home/ubuntu/ocr/CSS447-General-Project/results/E-vpa-off-1/vpa.json",
+  "cost": "/home/ubuntu/ocr/CSS447-General-Project/results/E-vpa-off-1/cost.md"
+}

@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ocr
+  namespace: ocr-lab
+  labels:
+    app: ocr
+spec:
+  # Scenarios (kustomize overlays) override this value.
+  replicas: 1
+  # Single-node lab: a default rolling update (maxSurge 25%) would create a
+  # 4th pod that cannot be scheduled, deadlocking the rollout. Replace first.
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1
+  selector:
+    # Must match template labels; this is how the Deployment finds its pods.
+    matchLabels:
+      app: ocr
+  template:
+    metadata:
+      labels:
+        app: ocr
+    spec:
+      containers:
+        - name: ocr
+          # Digest instead of a mutable tag: every experiment runs the same bytes.
+          image: ferraripupu/ocr-app@sha256:3e1fb257348392ad5744aa12dd5af3bc651dbc91060578650bc05f81c7b1b326
+          # Digest already pins the image, so there is no reason to pull on every start.
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8884
+          resources:
+            requests:
+              # Calibrated in Stage 5. HPA computes CPU utilization as
+              # usage / request, so these numbers directly drive scaling.
+              # 400m lets 3 pods fit on this 2-vCPU node; the measured
+              # saturated usage is ~1.8 cores/pod (see docs/04-calibration.md).
+              cpu: 400m
+              memory: 256Mi
+            limits:
+              # Peak measured working set was ~145Mi; 384Mi leaves ~2.6x headroom.
+              # Exceeding it gets the container OOMKilled (restart).
+              memory: 384Mi
+              # No CPU limit on purpose: CPU limits cause CFS throttling and add
+              # latency noise. We can study that separately if needed.
+          startupProbe:
+            # Gives the app time to boot while liveness stays silent.
+            # 30 * 5s = up to 150s of startup budget (tesseract + deno start).
+            httpGet:
+              path: /.well-known/health/ready
+              port: 8884
+            periodSeconds: 5
+            failureThreshold: 30
+          readinessProbe:
+            # Decides whether the pod receives traffic from the Service.
+            httpGet:
+              path: /.well-known/health/ready
+              port: 8884
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+          livenessProbe:
+            # Decides whether the kubelet should restart the container.
+            # Deliberately soft, so a busy pod is not killed by accident.
+            httpGet:
+              path: /.well-known/health/live
+              port: 8884
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
+      # Load is generated from the same host in this lab; keep the pod on the
+      # only node explicitly so the intent is obvious.
+      nodeSelector:
+        kubernetes.io/hostname: ip-172-31-4-94

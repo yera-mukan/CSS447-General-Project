@@ -1,0 +1,202 @@
+# Values for kube-prometheus-stack 93.4.1 (Prometheus Operator based stack).
+# Goal: enough observability for the lab, but small enough for a 2-vCPU node.
+# Access is ClusterIP only; use `kubectl port-forward` (no public exposure).
+
+# We do not need the shipped alert rules for the experiment; fewer rule
+# evaluations means less CPU stolen from the OCR workload.
+defaultRules:
+  create: false
+
+# No Alertmanager: saves ~100m CPU and memory on a tiny node.
+alertmanager:
+  enabled: false
+
+# k3s runs these control-plane components inside the k3s process, so there is
+# no scrape target. Leaving them enabled produces permanently failing targets.
+kubeEtcd:
+  enabled: false
+kubeControllerManager:
+  enabled: false
+kubeScheduler:
+  enabled: false
+kubeProxy:
+  enabled: false
+
+grafana:
+  enabled: true
+  # Local/lab access. root_url must match how the browser reaches Grafana,
+  # otherwise login redirects point to localhost:3000. If you use an SSH
+  # tunnel instead, set this to http://localhost:13000/ (or a DNS name).
+  grafana.ini:
+    server:
+      domain: "16.192.176.90"
+      root_url: "http://16.192.176.90:13000/"
+      serve_from_sub_path: false
+  # Change this password before exposing Grafana beyond a trusted network.
+  adminPassword: ocrlab
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      # Grafana 13 needs more than 256Mi; it was OOMKilled at that limit.
+      memory: 768Mi
+  # Dashboards are discovered from ConfigMaps labelled grafana_dashboard=1
+  # in any namespace (we create one on Stage 7).
+  sidecar:
+    dashboards:
+      enabled: true
+      label: grafana_dashboard
+      searchNamespace: ALL
+  service:
+    type: ClusterIP
+
+prometheus:
+  enabled: true
+  service:
+    type: ClusterIP
+  prometheusSpec:
+    retention: 48h
+    scrapeInterval: 15s
+    evaluationInterval: 30s
+    # Allow k6 to push its own metrics over remote write.
+    enableRemoteWriteReceiver: true
+    walCompression: true
+    resources:
+      requests:
+        cpu: 250m
+        memory: 512Mi
+      limits:
+        # A bit of headroom to avoid Prometheus OOMKilled during long runs.
+        memory: 1536Mi
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: local-path
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 8Gi
+
+prometheusOperator:
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      memory: 256Mi
+
+kube-state-metrics:
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      memory: 192Mi
+  # kube-state-metrics does not read VPA objects by default; grant list/watch.
+  rbac:
+    extraRules:
+      - apiGroups: ["autoscaling.k8s.io"]
+        resources: ["verticalpodautoscalers"]
+        verbs: ["list", "watch"]
+  # Expose VPA recommendations as real Prometheus gauges.
+  # Config format validated against kube-state-metrics v2.20.0 docs
+  # (docs/metrics/extend/customresourcestate-metrics.md), which ships with chart 9.0.1.
+  customResourceState:
+    enabled: true
+    config:
+      kind: CustomResourceStateMetrics
+      spec:
+        resources:
+          - groupVersionKind:
+              group: autoscaling.k8s.io
+              version: v1
+              kind: VerticalPodAutoscaler
+            metricNamePrefix: kube
+            labelsFromPath:
+              namespace: [metadata, namespace]
+              verticalpodautoscaler: [metadata, name]
+              target_api_version: [spec, targetRef, apiVersion]
+              target_kind: [spec, targetRef, kind]
+              target_name: [spec, targetRef, name]
+            metrics:
+              - name: verticalpodautoscaler_status_recommendation_containerrecommendations_target_cpu
+                help: Target CPU request recommended by VPA (cores).
+                commonLabels:
+                  unit: core
+                  resource: cpu
+                each:
+                  type: Gauge
+                  gauge:
+                    path: [status, recommendation, containerRecommendations]
+                    labelsFromPath:
+                      container: [containerName]
+                    valueFrom: [target, cpu]
+              - name: verticalpodautoscaler_status_recommendation_containerrecommendations_target_memory
+                help: Target memory request recommended by VPA (bytes).
+                commonLabels:
+                  unit: byte
+                  resource: memory
+                each:
+                  type: Gauge
+                  gauge:
+                    path: [status, recommendation, containerRecommendations]
+                    labelsFromPath:
+                      container: [containerName]
+                    valueFrom: [target, memory]
+              - name: verticalpodautoscaler_status_recommendation_containerrecommendations_lowerbound_cpu
+                help: Lower bound CPU recommendation from VPA (cores).
+                commonLabels:
+                  unit: core
+                  resource: cpu
+                each:
+                  type: Gauge
+                  gauge:
+                    path: [status, recommendation, containerRecommendations]
+                    labelsFromPath:
+                      container: [containerName]
+                    valueFrom: [lowerBound, cpu]
+              - name: verticalpodautoscaler_status_recommendation_containerrecommendations_lowerbound_memory
+                help: Lower bound memory recommendation from VPA (bytes).
+                commonLabels:
+                  unit: byte
+                  resource: memory
+                each:
+                  type: Gauge
+                  gauge:
+                    path: [status, recommendation, containerRecommendations]
+                    labelsFromPath:
+                      container: [containerName]
+                    valueFrom: [lowerBound, memory]
+              - name: verticalpodautoscaler_status_recommendation_containerrecommendations_upperbound_cpu
+                help: Upper bound CPU recommendation from VPA (cores).
+                commonLabels:
+                  unit: core
+                  resource: cpu
+                each:
+                  type: Gauge
+                  gauge:
+                    path: [status, recommendation, containerRecommendations]
+                    labelsFromPath:
+                      container: [containerName]
+                    valueFrom: [upperBound, cpu]
+              - name: verticalpodautoscaler_status_recommendation_containerrecommendations_upperbound_memory
+                help: Upper bound memory recommendation from VPA (bytes).
+                commonLabels:
+                  unit: byte
+                  resource: memory
+                each:
+                  type: Gauge
+                  gauge:
+                    path: [status, recommendation, containerRecommendations]
+                    labelsFromPath:
+                      container: [containerName]
+                    valueFrom: [upperBound, memory]
+
+prometheus-node-exporter:
+  resources:
+    requests:
+      cpu: 30m
+      memory: 32Mi
+    limits:
+      memory: 64Mi

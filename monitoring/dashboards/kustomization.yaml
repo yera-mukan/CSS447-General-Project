@@ -1,0 +1,13 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# Grafana's dashboard sidecar watches ConfigMaps with label grafana_dashboard=1
+# in all namespaces (searchNamespace: ALL in the Helm values).
+configMapGenerator:
+  - name: ocr-autoscaling-dashboard
+    files:
+      - ocr-autoscaling.json
+generatorOptions:
+  labels:
+    grafana_dashboard: "1"
+  disableNameSuffixHash: true

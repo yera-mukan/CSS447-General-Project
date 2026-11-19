@@ -1,0 +1,28 @@
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: ocr
+  namespace: ocr-lab
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: ocr
+  minReplicas: 1
+  # Limited by the single 2-vCPU node. floor(2000m / cpu_request) minus system
+  # and monitoring pods; adjusted after Stage 5 calibration.
+  maxReplicas: 3
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          # HPA tries to keep average CPU utilization at 30% of the request.
+          type: Utilization
+          averageUtilization: 30
+  behavior:
+    # Identical in all B scenarios so the comparison is fair.
+    scaleUp:
+      stabilizationWindowSeconds: 0
+    scaleDown:
+      stabilizationWindowSeconds: 120

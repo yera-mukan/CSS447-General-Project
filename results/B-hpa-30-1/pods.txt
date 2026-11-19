@@ -1,0 +1,4 @@
+NAME                  READY   STATUS    RESTARTS   AGE     IP           NODE             NOMINATED NODE   READINESS GATES
+ocr-5485b8d9d-2plwz   1/1     Running   0          50m     10.42.0.21   ip-172-31-4-94   <none>           <none>
+ocr-5485b8d9d-8592w   1/1     Running   0          7m32s   10.42.0.25   ip-172-31-4-94   <none>           <none>
+ocr-5485b8d9d-mdktv   1/1     Running   0          7m32s   10.42.0.24   ip-172-31-4-94   <none>           <none>

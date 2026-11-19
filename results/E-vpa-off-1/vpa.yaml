@@ -1,0 +1,53 @@
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"autoscaling.k8s.io/v1","kind":"VerticalPodAutoscaler","metadata":{"annotations":{},"name":"ocr","namespace":"ocr-lab"},"spec":{"resourcePolicy":{"containerPolicies":[{"containerName":"ocr","controlledResources":["cpu","memory"],"controlledValues":"RequestsAndLimits","maxAllowed":{"cpu":"500m","memory":"2Gi"},"minAllowed":{"cpu":"250m","memory":"256Mi"}}]},"targetRef":{"apiVersion":"apps/v1","kind":"Deployment","name":"ocr"},"updatePolicy":{"updateMode":"Off"}}}
+  creationTimestamp: "2026-11-19T18:39:22Z"
+  generation: 1
+  name: ocr
+  namespace: ocr-lab
+  resourceVersion: "6345"
+  uid: 7f307a97-47db-428b-8f3d-949d55ae6bc9
+spec:
+  resourcePolicy:
+    containerPolicies:
+    - containerName: ocr
+      controlledResources:
+      - cpu
+      - memory
+      controlledValues: RequestsAndLimits
+      maxAllowed:
+        cpu: 500m
+        memory: 2Gi
+      minAllowed:
+        cpu: 250m
+        memory: 256Mi
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: ocr
+  updatePolicy:
+    updateMode: "Off"
+status:
+  conditions:
+  - lastTransitionTime: "2026-11-19T18:39:48Z"
+    status: "True"
+    type: RecommendationProvided
+  observedGeneration: 1
+  recommendation:
+    containerRecommendations:
+    - containerName: ocr
+      lowerBound:
+        cpu: 250m
+        memory: 256Mi
+      target:
+        cpu: 500m
+        memory: 256Mi
+      uncappedTarget:
+        cpu: 1311m
+        memory: 250Mi
+      upperBound:
+        cpu: 500m
+        memory: 2Gi

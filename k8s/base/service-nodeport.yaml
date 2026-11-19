@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ocr-nodeport
+  namespace: ocr-lab
+  labels:
+    app: ocr
+spec:
+  # NodePort is used ONLY by the load generator. Because k6 runs on the same
+  # host in this lab, traffic goes to 127.0.0.1. Do NOT open 30000-32767 in the
+  # AWS security group; otherwise this service becomes internet-facing.
+  type: NodePort
+  selector:
+    app: ocr
+  ports:
+    - name: http
+      port: 8884
+      targetPort: 8884
+      nodePort: 30884

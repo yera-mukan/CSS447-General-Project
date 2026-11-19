@@ -1,0 +1,71 @@
+{
+    "apiVersion": "autoscaling.k8s.io/v1",
+    "kind": "VerticalPodAutoscaler",
+    "metadata": {
+        "annotations": {
+            "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"autoscaling.k8s.io/v1\",\"kind\":\"VerticalPodAutoscaler\",\"metadata\":{\"annotations\":{},\"name\":\"ocr\",\"namespace\":\"ocr-lab\"},\"spec\":{\"resourcePolicy\":{\"containerPolicies\":[{\"containerName\":\"ocr\",\"controlledResources\":[\"memory\"],\"controlledValues\":\"RequestsAndLimits\",\"maxAllowed\":{\"memory\":\"2Gi\"},\"minAllowed\":{\"memory\":\"256Mi\"}}]},\"targetRef\":{\"apiVersion\":\"apps/v1\",\"kind\":\"Deployment\",\"name\":\"ocr\"},\"updatePolicy\":{\"updateMode\":\"Recreate\"}}}\n"
+        },
+        "creationTimestamp": "2026-11-19T18:26:15Z",
+        "generation": 1,
+        "name": "ocr",
+        "namespace": "ocr-lab",
+        "resourceVersion": "5809",
+        "uid": "47a57e0e-1f52-4e97-bc0a-c87beeff7d13"
+    },
+    "spec": {
+        "resourcePolicy": {
+            "containerPolicies": [
+                {
+                    "containerName": "ocr",
+                    "controlledResources": [
+                        "memory"
+                    ],
+                    "controlledValues": "RequestsAndLimits",
+                    "maxAllowed": {
+                        "memory": "2Gi"
+                    },
+                    "minAllowed": {
+                        "memory": "256Mi"
+                    }
+                }
+            ]
+        },
+        "targetRef": {
+            "apiVersion": "apps/v1",
+            "kind": "Deployment",
+            "name": "ocr"
+        },
+        "updatePolicy": {
+            "updateMode": "Recreate"
+        }
+    },
+    "status": {
+        "conditions": [
+            {
+                "lastTransitionTime": "2026-11-19T18:26:48Z",
+                "status": "True",
+                "type": "RecommendationProvided"
+            }
+        ],
+        "observedGeneration": 1,
+        "recommendation": {
+            "containerRecommendations": [
+                {
+                    "containerName": "ocr",
+                    "lowerBound": {
+                        "memory": "256Mi"
+                    },
+                    "target": {
+                        "memory": "256Mi"
+                    },
+                    "uncappedTarget": {
+                        "memory": "250Mi"
+                    },
+                    "upperBound": {
+                        "memory": "2Gi"
+                    }
+                }
+            ]
+        }
+    }
+}

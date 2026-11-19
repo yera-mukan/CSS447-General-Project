@@ -1,0 +1,24 @@
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: ocr
+  namespace: ocr-lab
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: ocr
+  updatePolicy:
+    # Off: only produce recommendations; never change or evict pods.
+    updateMode: "Off"
+  resourcePolicy:
+    containerPolicies:
+      - containerName: ocr
+        minAllowed:
+          cpu: 250m
+          memory: 256Mi
+        maxAllowed:
+          cpu: "500m"
+          memory: 2Gi
+        controlledResources: ["cpu", "memory"]
+        controlledValues: RequestsAndLimits

@@ -1,0 +1,13 @@
+{
+  "scenario": "D-hpa-cpu-vpa-mem",
+  "rep": 1,
+  "start": "2026-11-19T18:26:15Z",
+  "end": "2026-11-19T18:36:19Z",
+  "start_epoch": 1795112775,
+  "end_epoch": 1795113379,
+  "duration_s": 604,
+  "k6_exit_code": 99,
+  "k6": "/home/ubuntu/ocr/CSS447-General-Project/results/D-hpa-cpu-vpa-mem-1/k6.json",
+  "vpa": "/home/ubuntu/ocr/CSS447-General-Project/results/D-hpa-cpu-vpa-mem-1/vpa.json",
+  "cost": "/home/ubuntu/ocr/CSS447-General-Project/results/D-hpa-cpu-vpa-mem-1/cost.md"
+}

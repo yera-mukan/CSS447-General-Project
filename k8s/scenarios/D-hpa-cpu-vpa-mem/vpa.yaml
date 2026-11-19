@@ -1,0 +1,23 @@
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: ocr
+  namespace: ocr-lab
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: ocr
+  updatePolicy:
+    updateMode: "Recreate"
+  resourcePolicy:
+    containerPolicies:
+      - containerName: ocr
+        minAllowed:
+          memory: 256Mi
+        maxAllowed:
+          memory: 2Gi
+        # ONLY memory: HPA owns CPU. If VPA also controlled CPU they would
+        # fight: VPA changes requests while HPA changes replica count.
+        controlledResources: ["memory"]
+        controlledValues: RequestsAndLimits

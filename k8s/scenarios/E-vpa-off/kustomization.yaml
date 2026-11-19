@@ -1,0 +1,7 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# Scenario E: recommendations only (VPA Off), no HPA.
+resources:
+  - ../../base
+  - vpa.yaml

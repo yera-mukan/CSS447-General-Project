@@ -1,0 +1,29 @@
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: ocr
+  namespace: ocr-lab
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: ocr
+  updatePolicy:
+    # `Auto` is deprecated since VPA 1.5 and is equivalent to `Recreate`
+    # (admission-time assignment + eviction/recreation when out of bounds).
+    # We use the explicit name so the behaviour is obvious.
+    updateMode: "Recreate"
+  resourcePolicy:
+    containerPolicies:
+      - containerName: ocr
+        # Never recommend below these values.
+        minAllowed:
+          cpu: 250m
+          memory: 256Mi
+        # Upper bound that still lets pods fit on the 2-vCPU / 8-GiB node.
+        maxAllowed:
+          cpu: "500m"
+          memory: 2Gi
+        controlledResources: ["cpu", "memory"]
+        # VPA manages both requests and limits for those resources.
+        controlledValues: RequestsAndLimits

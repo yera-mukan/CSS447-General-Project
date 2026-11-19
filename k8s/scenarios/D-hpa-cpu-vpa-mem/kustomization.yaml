@@ -1,0 +1,8 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# Scenario D: HPA on CPU + VPA on memory only.
+resources:
+  - ../../base
+  - hpa.yaml
+  - vpa.yaml

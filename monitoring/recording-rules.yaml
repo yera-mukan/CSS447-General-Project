@@ -1,0 +1,57 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: ocr-autoscaling-rules
+  namespace: monitoring
+  labels:
+    # kube-prometheus-stack selects rules by this release label.
+    release: kps
+spec:
+  groups:
+    - name: ocr-autoscaling
+      interval: 30s
+      rules:
+        # Node constants, substituted from env.sh by `make rules`
+        # (envsubst). They are recorded so dashboards/cost queries can use them.
+        - record: ocr:node_price_per_hour
+          expr: vector(${NODE_PRICE_PER_HOUR})
+        - record: ocr:node_vcpu
+          expr: vector(${NODE_VCPU})
+        - record: ocr:node_ram_bytes
+          expr: vector(${NODE_RAM_GIB} * 1024 * 1024 * 1024)
+
+        # Reserved resources of the OCR containers (requests, in cores/bytes).
+        - record: ocr:cpu_requests_cores
+          expr: sum(kube_pod_container_resource_requests{namespace="ocr-lab",container="ocr",resource="cpu"})
+        - record: ocr:mem_requests_bytes
+          expr: sum(kube_pod_container_resource_requests{namespace="ocr-lab",container="ocr",resource="memory"})
+
+        # Real consumption.
+        - record: ocr:cpu_usage_cores
+          expr: sum(rate(container_cpu_usage_seconds_total{namespace="ocr-lab",container="ocr"}[1m]))
+        - record: ocr:mem_usage_bytes
+          expr: sum(container_memory_working_set_bytes{namespace="ocr-lab",container="ocr"})
+
+        # Shares of the node.
+        - record: ocr:cpu_share
+          expr: ocr:cpu_requests_cores / on() ocr:node_vcpu
+        - record: ocr:mem_share
+          expr: ocr:mem_requests_bytes / on() ocr:node_ram_bytes
+
+        # Dominant resource: whichever share is larger limits scheduling first.
+        - record: ocr:alloc_share
+          expr: (ocr:cpu_share > ocr:mem_share) or (ocr:mem_share >= ocr:cpu_share)
+
+        # Allocated cost in USD/hour: reserved share * node price.
+        - record: ocr:allocated_cost_per_hour
+          expr: ocr:alloc_share * on() ocr:node_price_per_hour
+
+        # HPA's own signal.
+        - record: ocr:cpu_utilization
+          expr: ocr:cpu_usage_cores / ocr:cpu_requests_cores
+
+        # Scheduling pressure on a single node.
+        - record: ocr:pending_pods
+          expr: sum(kube_pod_status_phase{namespace="ocr-lab",phase="Pending"})
+        - record: ocr:replicas_available
+          expr: kube_deployment_status_replicas_available{namespace="ocr-lab",deployment="ocr"}

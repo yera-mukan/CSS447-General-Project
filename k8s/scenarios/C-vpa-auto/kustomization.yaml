@@ -1,0 +1,12 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# Scenario C: VPA only. Fixed 2 replicas so the updater can evict one pod
+# while the other keeps serving traffic (updater default min-replicas = 2).
+resources:
+  - ../../base
+  - vpa.yaml
+
+replicas:
+  - name: ocr
+    count: 2

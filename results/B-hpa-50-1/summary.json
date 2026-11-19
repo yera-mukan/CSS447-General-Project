@@ -1,0 +1,13 @@
+{
+  "scenario": "B-hpa-50",
+  "rep": 1,
+  "start": "2026-11-19T17:11:06Z",
+  "end": "2026-11-19T17:21:07Z",
+  "start_epoch": 1795108266,
+  "end_epoch": 1795108867,
+  "duration_s": 601,
+  "k6_exit_code": 99,
+  "k6": "/home/ubuntu/ocr/CSS447-General-Project/results/B-hpa-50-1/k6.json",
+  "vpa": "/home/ubuntu/ocr/CSS447-General-Project/results/B-hpa-50-1/vpa.json",
+  "cost": "/home/ubuntu/ocr/CSS447-General-Project/results/B-hpa-50-1/cost.md"
+}

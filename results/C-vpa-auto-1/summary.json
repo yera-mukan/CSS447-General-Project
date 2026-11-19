@@ -1,0 +1,13 @@
+{
+  "scenario": "C-vpa-auto",
+  "rep": 1,
+  "start": "2026-11-19T18:13:04Z",
+  "end": "2026-11-19T18:23:08Z",
+  "start_epoch": 1795111984,
+  "end_epoch": 1795112588,
+  "duration_s": 604,
+  "k6_exit_code": 99,
+  "k6": "/home/ubuntu/ocr/CSS447-General-Project/results/C-vpa-auto-1/k6.json",
+  "vpa": "/home/ubuntu/ocr/CSS447-General-Project/results/C-vpa-auto-1/vpa.json",
+  "cost": "/home/ubuntu/ocr/CSS447-General-Project/results/C-vpa-auto-1/cost.md"
+}
