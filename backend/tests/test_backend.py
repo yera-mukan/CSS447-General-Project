@@ -1,6 +1,8 @@
 import io
 import os
 import time
+from concurrent.futures import ThreadPoolExecutor
+from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
 import httpx
@@ -68,3 +70,115 @@ def test_real_ocr_library():
         assert not client.get(f"{root}/search", headers=owner, params={"q": corrected}).json()[
             "items"
         ]
+
+
+@pytest.mark.skipif(not os.getenv("SMOKE_URL"), reason="requires the running local OCR stack")
+def test_cross_user_access_for_every_document_route():
+    with httpx.Client(base_url=os.environ["SMOKE_URL"], timeout=10) as client:
+
+        def token():
+            user = {"email": f"{uuid4().hex}@example.com", "password": "example-password"}
+            client.post("/api/v1/auth/register", json=user).raise_for_status()
+            result = client.post("/api/v1/auth/login", json=user).raise_for_status().json()
+            return {"Authorization": f"Bearer {result['access_token']}"}
+
+        owner, stranger = token(), token()
+        image = Image.new("RGB", (20, 20), "white")
+        buf = io.BytesIO()
+        image.save(buf, format="PNG")
+        created = client.post(
+            "/api/v1/documents",
+            headers=owner,
+            files={"file": ("access.png", buf.getvalue(), "image/png")},
+        )
+        created.raise_for_status()
+        doc_id = created.json()["id"]
+        root = f"/api/v1/documents/{doc_id}"
+        try:
+            for _ in range(100):
+                if client.get(root, headers=owner).json()["status"] in {"ready", "failed"}:
+                    break
+                time.sleep(0.2)
+            checks = [
+                client.get(root, headers=stranger),
+                client.get(f"{root}/image", headers=stranger),
+                client.patch(root, headers=stranger, json={"title": "stolen"}),
+                client.post(f"{root}/retry", headers=stranger),
+                client.get(f"{root}/export", headers=stranger),
+                client.delete(root, headers=stranger),
+            ]
+            assert [r.status_code for r in checks] == [404] * len(checks)
+            listed = client.get("/api/v1/documents", headers=stranger).json()["items"]
+            searched = client.get(
+                "/api/v1/documents/search", headers=stranger, params={"q": "access"}
+            ).json()["items"]
+            assert doc_id not in {str(row["id"]) for row in listed + searched}
+        finally:
+            client.delete(root, headers=owner)
+
+
+@pytest.mark.skipif(not os.getenv("DATABASE_URL"), reason="requires PostgreSQL")
+def test_expired_lease_is_reclaimed_and_stale_token_cannot_finish():
+    from sqlalchemy import update
+
+    from app import Document, SessionLocal, User, claim_document
+
+    with SessionLocal.begin() as db:
+        user = User(email=f"{uuid4().hex}@example.com", password_hash="test-only")
+        db.add(user)
+        db.flush()
+        document = Document(
+            owner_id=user.id,
+            title="lease",
+            original_filename="x.png",
+            mime_type="image/png",
+            image_data=b"image",
+            status="processing",
+            attempts=1,
+            claim_token="expired-token",
+            lease_expires_at=datetime.now(UTC) - timedelta(seconds=1),
+        )
+        db.add(document)
+        db.flush()
+        doc_id = document.id
+    with SessionLocal() as db:
+        claimed = claim_document(db)
+    assert claimed and claimed[0] == doc_id and claimed[1] != "expired-token"
+    with SessionLocal.begin() as db:
+        result = db.execute(
+            update(Document)
+            .where(
+                Document.id == doc_id,
+                Document.status == "processing",
+                Document.claim_token == "expired-token",
+            )
+            .values(status="ready", extracted_text="stale")
+        )
+        assert result.rowcount == 0
+        db.execute(update(Document).where(Document.id == doc_id).values(status="failed"))
+        db.execute(Document.__table__.delete().where(Document.id == doc_id))
+
+
+@pytest.mark.skipif(not os.getenv("SMOKE_URL"), reason="requires the running local OCR stack")
+def test_concurrent_pending_admission_limit():
+    with httpx.Client(base_url=os.environ["SMOKE_URL"], timeout=30) as client:
+        user = {"email": f"{uuid4().hex}@example.com", "password": "example-password"}
+        client.post("/api/v1/auth/register", json=user).raise_for_status()
+        login = client.post("/api/v1/auth/login", json=user).raise_for_status().json()
+        headers = {"Authorization": f"Bearer {login['access_token']}"}
+
+    def upload(_):
+        with httpx.Client(base_url=os.environ["SMOKE_URL"], timeout=30) as client:
+            return client.post(
+                "/api/v1/documents",
+                headers=headers,
+                files={"file": ("queue.png", TEST_IMAGE, "image/png")},
+            ).status_code
+
+    TEST_IMAGE_BUFFER = io.BytesIO()
+    Image.new("RGB", (30, 30), "white").save(TEST_IMAGE_BUFFER, format="PNG")
+    TEST_IMAGE = TEST_IMAGE_BUFFER.getvalue()
+    with ThreadPoolExecutor(max_workers=16) as pool:
+        codes = list(pool.map(upload, range(16)))
+    assert codes.count(202) <= 10
+    assert codes.count(429) >= 6

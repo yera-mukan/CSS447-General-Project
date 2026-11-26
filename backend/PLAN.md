@@ -6,4 +6,7 @@
 - Persistence. All five ready benchmark documents still contained image bytes after a Compose restart.
 - OCR. Readiness returned HTTP 200 and direct multipart OCR returned exit code 0 with the expected text. Tested image digest is ferraripupu/ocr-app@sha256:5fef8089504e53c0fc968a28e54bdb93f1fc9b5a87e40d8b4446dc8efe15431c.
 - Benchmark. Five of five uploads succeeded. Mean queue wait was 0.703 s, mean processing was 0.415 s, and mean upload-to-searchable was 1.484 s.
-- Remaining checks. Worker recovery after an interrupted claim, pending-job admission under concurrency, and exhaustive ownership tests remain unverified.
+- Additional verification. All five Linux pytest tests passed. Tests cover reclaimed expired leases and rejection of stale claim tokens, 16 simultaneous uploads respecting the per-user pending cap, and foreign-user denial for every document route including list and search.
+- Ruff. `ruff check` and `ruff format --check` passed.
+- Git hygiene. `.env` is ignored, and the staged change contains only backend code, docs, tests, lockfile, and backend CI. No private document fixtures or generated images are staged.
+- Pull request. Feature branch push and PR creation are pending.

@@ -30,4 +30,6 @@ Run `uv run python benchmark.py --image path/to/synthetic-page.png --base-url ht
 
 The local verification used five synthetic uploads and measured mean queue wait of 0.703 s, processing of 0.415 s, and upload-to-searchable latency of 1.484 s. All five succeeded. See PLAN.md for the tested OCR digest and verification coverage.
 
+Final verification also passed five Linux pytest cases, including expired-lease recovery, stale claim protection, concurrent queue admission, and owner checks across all document endpoints. Ruff lint and format checks passed.
+
 Frontend clients can retrieve the schema from http://127.0.0.1:8000/openapi.json. Send the login token in the Authorization header for document requests. Set CORS_ORIGINS to the frontend origin before starting Compose.
