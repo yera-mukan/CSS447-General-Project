@@ -10,3 +10,4 @@
 - Ruff. `ruff check` and `ruff format --check` passed.
 - Git hygiene. `.env` is ignored, and the staged change contains only backend code, docs, tests, lockfile, and backend CI. No private document fixtures or generated images are staged.
 - Pull request. Feature branch push and PR creation are pending.
+- CI follow-up. The initial GitHub Actions run failed because pytest connected to localhost without a PostgreSQL service. Added a PostgreSQL Actions service on the ephemeral runner loopback port with a readiness check. Local Ruff lint/format, all five Linux pytest tests, and workflow YAML validation passed after the fix. The pushed Actions run is pending.
