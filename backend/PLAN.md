@@ -10,4 +10,4 @@
 - Ruff. `ruff check` and `ruff format --check` passed.
 - Git hygiene. `.env` is ignored, and the staged change contains only backend code, docs, tests, lockfile, and backend CI. No private document fixtures or generated images are staged.
 - Pull request. Feature branch push and PR creation are pending.
-- CI follow-up. GitHub confirmed the runner PostgreSQL service also needs an explicit schema migration. The workflow now runs `uv run --locked --extra dev alembic upgrade head` against its `DATABASE_URL` after dependency installation and before pytest. Local Ruff, migration-step ordering validation, and all five Linux tests passed. Hosted workflow result for this commit is pending.
+- CI follow-up. GitHub confirmed the runner PostgreSQL service also needs an explicit schema migration. The workflow runs `uv run --locked --extra dev alembic upgrade head` against the same `DATABASE_URL` before pytest. Local Ruff, migration-step ordering validation, and all five Linux tests passed. Hosted GitHub Actions run 45867832980 passed for commit `53bb959756f88f86955da4a0cae88bffcdfe10c5`.
