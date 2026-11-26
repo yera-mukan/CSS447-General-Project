@@ -1,0 +1,13 @@
+# Backend implementation and verification
+
+- Foundation. The backend is on the local feature branch. The locked dependencies installed, the images built, PostgreSQL became healthy, and Alembic exited successfully.
+- Core and library. The local stack passed the real OCR smoke test, covering registration, login, corrupt upload rejection, upload, polling, recognition, timestamps, original image retrieval, cross-user image denial, search, correction, export, and deletion.
+- Delivery. Ruff lint and format checks passed. Linux pytest passed both tests. Windows pytest initially failed because Application Control blocked the SQLAlchemy native extension. The backend workflow passed local YAML parsing. GitHub Actions execution is pending.
+- Persistence. All five ready benchmark documents still contained image bytes after a Compose restart.
+- OCR. Readiness returned HTTP 200 and direct multipart OCR returned exit code 0 with the expected text. Tested image digest is ferraripupu/ocr-app@sha256:5fef8089504e53c0fc968a28e54bdb93f1fc9b5a87e40d8b4446dc8efe15431c.
+- Benchmark. Five of five uploads succeeded. Mean queue wait was 0.703 s, mean processing was 0.415 s, and mean upload-to-searchable was 1.484 s.
+- Additional verification. All five Linux pytest tests passed. Tests cover reclaimed expired leases and rejection of stale claim tokens, 16 simultaneous uploads respecting the per-user pending cap, and foreign-user denial for every document route including list and search.
+- Ruff. `ruff check` and `ruff format --check` passed.
+- Git hygiene. `.env` is ignored, and the staged change contains only backend code, docs, tests, lockfile, and backend CI. No private document fixtures or generated images are staged.
+- Pull request. Feature branch push and PR creation are pending.
+- CI follow-up. GitHub confirmed the runner PostgreSQL service also needs an explicit schema migration. The workflow runs `uv run --locked --extra dev alembic upgrade head` against the same `DATABASE_URL` before pytest. Local Ruff, migration-step ordering validation, and all five Linux tests passed. Hosted GitHub Actions run 45867832980 passed for commit `53bb959756f88f86955da4a0cae88bffcdfe10c5`.
