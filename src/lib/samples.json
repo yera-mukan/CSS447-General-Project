@@ -1,0 +1,80 @@
+[
+  {
+    "id": "coast",
+    "title": "Coastal field notes",
+    "filename": "coast.jpg",
+    "mime": "image/jpeg",
+    "imageUrl": "/samples/coast.jpg",
+    "coverUrl": "/samples/coast-cover.webp",
+    "createdAt": "2026-11-24T12:00:00Z",
+    "status": "reviewed",
+    "starred": true,
+    "text": "SURVEY RECORD   /   PACIFIC COAST\nCoastal\nfield notes\nTIDELINE OBSERVATIONS\nNorth cove   /   Survey 04\nLow tide exposed a band of smooth slate.\nSalt grass marks the upper shoreline.",
+    "attempts": 1
+  },
+  {
+    "id": "receipt",
+    "title": "Studio supply receipt",
+    "filename": "receipt.jpg",
+    "mime": "image/jpeg",
+    "imageUrl": "/samples/receipt.jpg",
+    "coverUrl": "/samples/receipt-cover.webp",
+    "createdAt": "2026-11-23T12:00:00Z",
+    "status": "ready",
+    "starred": false,
+    "text": "PAPER & PIN\nSTUDIO SUPPLIES\n18 Linden Street\nSALES RECEIPT\nORDER #0286\nSketch pads\n24.00\nBlack ink\n12.00\nPaper clips\n4.00\nTOTAL\n40.00\nPayment received. Thank you!",
+    "attempts": 1
+  },
+  {
+    "id": "invite",
+    "title": "Form & Fold invitation",
+    "filename": "invite.jpg",
+    "mime": "image/jpeg",
+    "imageUrl": "/samples/invite.jpg",
+    "coverUrl": "/samples/invite-cover.webp",
+    "createdAt": "2026-11-22T12:00:00Z",
+    "status": "reviewed",
+    "starred": false,
+    "text": "OPEN STUDIO     /     EXHIBITION\nForm\n& Fold\nOpening night\nFriday, 6 November   /   18:00\nEast Gallery, 42 Mill Road",
+    "attempts": 1
+  },
+  {
+    "id": "agenda",
+    "title": "Workshop agenda",
+    "filename": "agenda.jpg",
+    "mime": "image/jpeg",
+    "imageUrl": "/samples/agenda.jpg",
+    "coverUrl": "/samples/agenda-cover.webp",
+    "createdAt": "2026-11-21T12:00:00Z",
+    "status": "ready",
+    "starred": false,
+    "text": "MAKER SPACE   /   STUDIO SESSION\nWorkshop\nagenda\nWednesday   /   10:00\u201313:00\n10:00\nMaterials and setup\n10:30\nHands-on printing\n12:00\nDrying and finishing\n12:45\nCleanup and notes\nBring an apron and a sketchbook.",
+    "attempts": 1
+  },
+  {
+    "id": "botany",
+    "title": "Botanical survey",
+    "filename": "botany.jpg",
+    "mime": "image/jpeg",
+    "imageUrl": "/samples/botany.jpg",
+    "coverUrl": "/samples/botany-cover.webp",
+    "createdAt": "2026-11-20T12:00:00Z",
+    "status": "reviewed",
+    "starred": true,
+    "text": "GARDEN RECORDS   /   SPECIMEN 12\nBotanical\nsurvey\nDryopteris filix-mas\nNorth garden, shaded border.\nMature fronds form a broad arch.",
+    "attempts": 1
+  },
+  {
+    "id": "print",
+    "title": "Print specifications",
+    "filename": "print.jpg",
+    "mime": "image/jpeg",
+    "imageUrl": "/samples/print.jpg",
+    "coverUrl": "/samples/print-cover.webp",
+    "createdAt": "2026-11-19T12:00:00Z",
+    "status": "ready",
+    "starred": false,
+    "text": "PRODUCTION   /   SPECIFICATION SHEET\nPrint\nspecifications\nEDITION 02    /    OFFSET PRINT\nFormat\n210 \u00d7 297 mm\nStock\nUncoated, 140 gsm\nFinish\nTrim to size\nProof\nCheck registration marks\nApprove the proof before production.",
+    "attempts": 1
+  }
+]
